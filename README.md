@@ -1,4 +1,12 @@
-# Tanooki Prefab
+# AllSpark Prefab Template
+
+This is the canonical, product-neutral starting point for AllSpark Prefab instances.
+Product features, customer data, branding, walkthroughs, and application-specific seed
+data do not belong in this repository. Releases are immutable and provisioning pins an
+approved release commit rather than following a mutable branch.
+
+Run `bin/verify-template-neutrality` before proposing template changes. The same check,
+along with boot, backend, frontend, and type checks, runs in CI.
 
 ## Development Setup
 

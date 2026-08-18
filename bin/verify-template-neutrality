@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$repo_root"
+
+forbidden_paths=(
+  app/models/channel.rb
+  app/models/credential.rb
+  app/models/media_asset.rb
+  app/models/post.rb
+  app/models/post_analytic.rb
+  app/models/post_channel_variant.rb
+  app/frontend/components/Calendar
+  app/frontend/components/Composer
+  app/frontend/components/MediaLibrary
+  app/frontend/screens/Dashboard/BrandVoiceScreen.tsx
+  app/frontend/screens/Dashboard/CalendarScreen.tsx
+  app/frontend/screens/Dashboard/ComposerScreen.tsx
+  app/frontend/screens/Dashboard/PostAnalyticsScreen.tsx
+  app/frontend/screens/Dashboard/PostsListScreen.tsx
+  public/walkthrough
+)
+
+for path in "${forbidden_paths[@]}"; do
+  if [[ -e "$path" ]]; then
+    echo "Template neutrality violation: forbidden product path exists: $path" >&2
+    exit 1
+  fi
+done
+
+forbidden_migrations='create_(channels|credentials|media_assets|posts|post_analytics|post_channel_variants)|brand_voice'
+if find db/migrate -type f -printf '%f\n' | grep -Eiq "$forbidden_migrations"; then
+  echo "Template neutrality violation: product-specific migration detected" >&2
+  find db/migrate -type f -printf '%f\n' | grep -Ei "$forbidden_migrations" >&2
+  exit 1
+fi
+
+forbidden_content='AllSpark Social|social media management|Tanooki Labs seed data|BrandVoiceScreen|PostAnalyticsScreen|PostsListScreen'
+if grep -RInE "$forbidden_content" app config db public --exclude-dir=assets --exclude='*.map'; then
+  echo "Template neutrality violation: product-specific content detected" >&2
+  exit 1
+fi
+
+ruby -rjson -e '
+  manifest = JSON.parse(File.read("template.json"))
+  abort "template.json must declare neutral=true" unless manifest["neutral"] == true
+  abort "template identity is invalid" unless manifest["template"] == "allspark-prefab-template"
+'
+
+echo "Template neutrality contract passed"
