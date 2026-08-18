@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "template": "allspark-prefab-template",
-  "release": "v1.0.0",
+  "release": "v1.1.0",
   "neutral": true,
   "source_baseline": "528d53526dff7201da8285eb56b9ff7e0b50c9aa",
   "stack": {
